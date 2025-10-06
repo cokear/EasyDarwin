@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  easydarwin:
+    image: cakeor/easydarwin:latest
+    container_name: easydarwin-dev
+    restart: "no"
+    ports:
+      - "8080:8080"
+      - "554:554"
+      - "1935:1935"
+      - "4433:4433"
+      - "5544:5544"
+      - "8083:8083"
+      - "8084:8084"
+      - "1290:1290"
+      - "30000-30100:30000-30100/udp"
+      - "6001:6001/udp"
+      - "4888:4888/udp"
+    volumes:
+      - ./configs:/app/configs
+      - ./web:/app/web
+      - ./logs:/app/logs
+      - ./data:/app/data
+    environment:
+      - TZ=Asia/Shanghai
+      - LOG_LEVEL=debug
+      - ENVIRONMENT=development
+    networks:
+      - easydarwin-dev-network
+    stdin_open: true
+    tty: true
+
+  redis:
+    image: redis:alpine
+    container_name: easydarwin-redis-dev
+    restart: "no"
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - easydarwin-dev-network
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: easydarwin-portainer-dev
+    restart: "no"
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer-data:/data
+    networks:
+      - easydarwin-dev-network
+
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: easydarwin-dozzle-dev
+    restart: "no"
+    ports:
+      - "9999:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - easydarwin-dev-network
+
+networks:
+  easydarwin-dev-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  portainer-data:

@@ -1,0 +1,71 @@
+# EasyDarwin 配置文件示例
+
+[server]
+# 服务器基本配置
+name = "EasyDarwin"
+listen = ":8080"
+debug = false
+
+[rtsp]
+# RTSP服务配置
+enable = true
+listen = ":554"
+# 认证配置
+auth_enable = false
+auth_username = "admin"
+auth_password = "admin123"
+
+[rtmp]
+# RTMP服务配置
+enable = true
+listen = ":1935"
+# 推流认证
+publish_auth = false
+play_auth = false
+
+[webrtc]
+# WebRTC配置
+enable = true
+signal_port = 4433
+media_port = 5544
+# ICE服务器配置
+ice_servers = [
+    "stun:stun.l.google.com:19302"
+]
+
+[hls]
+# HLS配置
+enable = true
+segment_duration = 10
+segment_count = 3
+cleanup = true
+
+[record]
+# 录像配置
+enable = false
+path = "/app/records"
+format = "mp4"
+# 自动录制
+auto_record = false
+
+[log]
+# 日志配置
+level = "info"
+path = "/app/logs"
+max_size = 100
+max_age = 7
+max_backups = 10
+
+[database]
+# 数据库配置（可选）
+type = "sqlite"
+path = "/app/data/easydarwin.db"
+
+[auth]
+# 全局认证配置
+enable = false
+username = "admin"
+password = "admin123"
+# JWT配置
+jwt_secret = "your-secret-key"
+jwt_expire = 3600

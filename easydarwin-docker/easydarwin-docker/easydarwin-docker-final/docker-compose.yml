@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  easydarwin:
+    image: cakeor/easydarwin:latest
+    container_name: easydarwin
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "554:554"
+      - "1935:1935"
+      - "4433:4433"
+      - "5544:5544"
+      - "8083:8083"
+      - "8084:8084"
+      - "1290:1290"
+      - "30000-30100:30000-30100/udp"
+      - "6001:6001/udp"
+      - "4888:4888/udp"
+    volumes:
+      - ./data/configs:/app/configs
+      - ./data/logs:/app/logs
+      - ./data/web:/app/web
+    environment:
+      - TZ=Asia/Shanghai
+      - LOG_LEVEL=info
+    networks:
+      - easydarwin-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/api/v1/getserverinfo"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  easydarwin-network:
+    driver: bridge
