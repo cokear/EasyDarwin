@@ -1,0 +1,52 @@
+# 手动推送 cakeor/easydarwin 到 Docker Hub 的命令
+
+## 方法1: 使用 Podman (推荐)
+
+# 1. 确保镜像已正确标记
+export PODMAN_IGNORE_CGROUPSV1_WARNING=1
+podman tag localhost/easydarwin:latest cakeor/easydarwin:latest
+podman tag localhost/easydarwin:latest cakeor/easydarwin:v8.3.3
+
+# 2. 查看镜像
+podman images | grep cakeor/easydarwin
+
+# 3. 登录 Docker Hub
+podman login docker.io
+# 输入用户名: cakeor
+# 输入密码: [你的密码或访问令牌]
+
+# 4. 推送镜像
+podman push cakeor/easydarwin:latest
+podman push cakeor/easydarwin:v8.3.3
+
+## 方法2: 使用 Docker
+
+# 1. 从 Podman 导出镜像到 Docker
+podman save -o easydarwin.tar localhost/easydarwin:latest
+docker load -i easydarwin.tar
+rm easydarwin.tar
+
+# 2. 为镜像打标签
+docker tag easydarwin:latest cakeor/easydarwin:latest
+docker tag easydarwin:latest cakeor/easydarwin:v8.3.3
+
+# 3. 登录 Docker Hub
+docker login
+# 输入用户名: cakeor
+# 输入密码: [你的密码或访问令牌]
+
+# 4. 推送镜像
+docker push cakeor/easydarwin:latest
+docker push cakeor/easydarwin:v8.3.3
+
+## 推送完成后的使用
+
+# 其他人可以通过以下命令拉取镜像:
+docker pull cakeor/easydarwin:latest
+docker pull cakeor/easydarwin:v8.3.3
+
+# 运行容器:
+docker run -d --name easydarwin -p 8080:8080 cakeor/easydarwin:latest
+
+# Docker Hub 链接:
+# https://hub.docker.com/r/cakeor/easydarwin
