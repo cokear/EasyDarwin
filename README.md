@@ -1,143 +1,92 @@
-# EasyDarwin
+# EasyDarwin Docker Compose
 
-[EasyDarwin](http://www.easydarwin.com/) is an open-source, simple, and efficient streaming media server that supports RTMP/RTSP push and pull streams. It also supports distributing streams via RTMP/RTSP/HLS/HTTP-FLV/WebSocket-FLV/WebRTC protocols. EasyDarwin can be compiled to support Linux/Windows/macOS operating systems and various architectures including X86_64, ARMv7, AARCH64, M1, RISCV, LOONGARCH, MIPS.
+基于Docker Compose的EasyDarwin流媒体服务器部署方案。
 
-EasyDarwin 8.x is a secondary development based on the original [EasyDarwin](https://www.easydarwin.org/) software combined with the [lalmax](https://github.com/q191201771/lalmax) project.
+## 🚀 快速开始
 
-EasyDarwin is licensed under the MIT License.
-
-![example](https://www.easydarwin.com/images/EasyDarwin/preview.png)
-
-## Features
-
-+ Integrated web interface
-+ Video preview
-+ Supports on-demand playback; automatically disconnects when no viewers are present to save bandwidth
-+ Supports outputting multiple protocols (RTMP/RTSP/HLS/HTTP-FLV/WebSocket-FLV/WebRTC)
-+ Allows direct viewing of camera feeds through a single stream URL without requiring login or API calls
-+ Protocol supports playing H264 and H265
-+ Supports pulling RTSP streams and redistributing them via various protocols
-+ Supports push stream authentication
-+ Offline and online monitoring
-+ Video on demand functionality
-+ RESTful API with apidoc documentation tool (located in the web directory)
-
-### Features to be Added
-+ User Authentication
-
-## Usage
-Currently, only source code compilation is supported for generation; one-click installation packages will be supported later. Please refer to the deployment section for instructions on building from source code before use.
-
-## Directory Structure
-
-```text
-├── cmd	                    Executable programs
-│   └── server
-├── configs                 Configuration files
-├── internal                Private business logic
-│   ├── conf                Configuration models
-│   ├── core                Business domain
-│   ├── data                Database and main configuration files
-│   └── web
-│       └── api             RESTful API
-├── pkg                     Dependency libraries
-├── utils                   Utilities
-└── web                     Frontend
+### 1. 一键启动
+```bash
+./start.sh
 ```
 
-## Deployment
-### Building from Source Code
-Prerequisites:
-+ Go 1.23.0 installed
-+ The Go bin directory must be added to the system environment variables
+### 2. 手动启动
+```bash
+# 创建数据目录
+mkdir -p data/{configs,logs,web}
 
-Then download:
-```shell
-git clone https://github.com/EasyDarwin/EasyDarwin.git
-cd EasyDarwin
-go mod tidy
-```
-### Building on Windows
+# 启动服务
+docker-compose up -d
 
-When using Makefile on Windows, please use the `git bash` terminal and ensure Mingw is installed.
-```shell
-mingw32-make.exe build/windows
-cd build
-cd EasyDarwin-win-"version"-"build-time"
-EasyDarwin.exe
-```
-### Building on Linux
-```shell
-make build/linux
-cd build
-cd EasyDarwin-lin-"version"-"build-time"
-easydarwin
+# 查看状态
+docker-compose ps
 ```
 
-### System Service
-EasyDarwin can run as a system service, ensuring that the program can be restarted and used even in case of unexpected interruptions.
+## 📋 服务信息
 
-```shell
-Install service: easydarwin -service install
-Start service: easydarwin -service start
-Restart service: easydarwin -service restart
-Stop service: easydarwin -service stop
-Uninstall service: easydarwin -service uninstall
+- **镜像**: `cakeor/easydarwin:latest`
+- **Web界面**: http://localhost:8080
+- **API文档**: http://localhost:8080/apidoc.html
+
+## 🔌 端口说明
+
+| 端口 | 协议 | 用途 |
+|------|------|------|
+| 8080 | HTTP | Web管理界面 |
+| 554 | TCP | RTSP服务 |
+| 1935 | TCP | RTMP服务 |
+| 4433/5544 | TCP | WebRTC |
+| 8083/8084 | HTTP | API服务 |
+| 30000-30100 | UDP | RTP传输 |
+
+## 📁 目录结构
+
+```
+.
+├── docker-compose.yml    # 主配置文件
+├── start.sh             # 启动脚本
+├── data/                # 数据目录
+│   ├── configs/         # 配置文件
+│   ├── logs/           # 日志文件
+│   └── web/            # Web文件
 ```
 
-## Getting Started Guide
+## 🛠️ 常用命令
 
-Open [http://localhost:10086](http://localhost:10086) and add the streaming protocol.
+```bash
+# 启动服务
+docker-compose up -d
 
-1. **RTMP Push Stream**
+# 停止服务
+docker-compose down
 
-   _When adding a push stream protocol, you need to check the actual push stream address, the following address is just an example._
+# 查看日志
+docker-compose logs -f
 
-   Then use the following [ffmpeg](https://ffmpeg.org/download.html) command to stream:
-    ```shell
-    ffmpeg -re -i ./video.flv -c copy -f flv -y rtmp://localhost:21935/live/stream_1?sign=5F9ZgWP6fN
-    ```
+# 重启服务
+docker-compose restart
 
-   Or, use the following configuration to stream through [OBS Studio](https://obsproject.com/download):
-    + Service: `Custom`
-    + Server: `rtmp://localhost:21935/live/`
-    + Stream Key: `stream_1?sign=5F9ZgWP6fN`
+# 更新镜像
+docker-compose pull && docker-compose up -d --force-recreate
+```
 
-2. **RTSP Pull Stream**
+## 🔧 配置修改
 
-   _When adding a pull stream protocol, you need to input the specific RTSP address of your camera._
+编辑 `data/configs/config.toml` 文件来修改EasyDarwin配置，然后重启服务：
 
-   For example, using Hikvision RTSP address format:
-    ```text
-    rtsp://username:password@host:port/Streaming/Channels/101
-   ```
+```bash
+docker-compose restart
+```
 
-   Or Dahua RTSP address format:
-    ```text
-    rtsp://username:password@ip:port/cam/realmonitor?channel=1&subtype=0
-   ```
+## 📊 监控
 
-## Custom Configuration
+服务包含健康检查，可通过以下命令查看状态：
 
-The default configuration directory is `config.toml` located in the same directory as the executable file.
+```bash
+docker-compose ps
+```
 
-### Ports
-// TODO
+## 🆘 故障排除
 
-## Project Dependencies
-
-+ lalmax
-+ gin
-+ gorm
-+ slog / zap
-+ lal
-+ sqlite
-+ pion
-
-## Support
-
-Mail: [support@easydarwin.org](mailto:support@easydarwin.org) 
-
-Website: [www.EasyDarwin.org](https://www.easydarwin.org)
-
-WeChat: EasyDarwin
+1. **端口冲突**: 修改 `docker-compose.yml` 中的端口映射
+2. **权限问题**: `sudo chown -R $USER:$USER data/`
+3. **查看日志**: `docker-compose logs easydarwin`

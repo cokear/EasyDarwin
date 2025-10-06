@@ -33,7 +33,6 @@ services:
       - ./data/web:/app/web
     environment:
       - TZ=Asia/Shanghai
-      # 可选：设置日志级别
       - LOG_LEVEL=info
     networks:
       - easydarwin-network
@@ -47,10 +46,3 @@ services:
 networks:
   easydarwin-network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
-
-volumes:
-  easydarwin-data:
-    driver: local
