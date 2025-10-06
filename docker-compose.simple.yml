@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  easydarwin:
+    image: cakeor/easydarwin:latest
+    container_name: easydarwin-simple
+    restart: unless-stopped
+    ports:
+      # 主要端口
+      - "8080:8080"   # Web管理界面
+      - "554:554"     # RTSP
+      - "1935:1935"   # RTMP
+    volumes:
+      # 最小化配置
+      - ./data:/app/configs
+    environment:
+      - TZ=Asia/Shanghai

@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  easydarwin:
+    image: cakeor/easydarwin:latest
+    container_name: easydarwin-dev
+    restart: "no"
+    ports:
+      # Web管理界面
+      - "8080:8080"
+      # RTSP端口
+      - "554:554"
+      # RTMP端口
+      - "1935:1935"
+      # WebRTC端口
+      - "4433:4433"
+      - "5544:5544"
+      # API端口
+      - "8083:8083"
+      - "8084:8084"
+      # 其他端口
+      - "1290:1290"
+      # UDP端口范围（用于RTP）
+      - "30000-30100:30000-30100/udp"
+      - "6001:6001/udp"
+      - "4888:4888/udp"
+    volumes:
+      # 开发时挂载本地配置文件
+      - ./configs:/app/configs
+      - ./web:/app/web
+      # 开发日志
+      - ./logs:/app/logs
+      # 开发数据
+      - ./data:/app/data
+    environment:
+      - TZ=Asia/Shanghai
+      - LOG_LEVEL=debug
+      - ENVIRONMENT=development
+    networks:
+      - easydarwin-dev-network
+    stdin_open: true
+    tty: true
+    # 开发环境不需要健康检查
+    # healthcheck:
+    #   disable: true
+
+  # 开发环境的数据库（如果需要）
+  redis:
+    image: redis:alpine
+    container_name: easydarwin-redis-dev
+    restart: "no"
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - easydarwin-dev-network
+    command: redis-server --appendonly yes
+
+  # 开发环境的监控工具
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: easydarwin-portainer-dev
+    restart: "no"
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer-data:/data
+    networks:
+      - easydarwin-dev-network
+
+  # 开发环境的日志查看工具
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: easydarwin-dozzle-dev
+    restart: "no"
+    ports:
+      - "9999:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - easydarwin-dev-network
+
+networks:
+  easydarwin-dev-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.22.0.0/16
+
+volumes:
+  redis-data:
+    driver: local
+  portainer-data:
+    driver: local

@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  easydarwin:
+    image: cakeor/easydarwin:latest
+    container_name: easydarwin
+    restart: unless-stopped
+    ports:
+      # Web管理界面
+      - "8080:8080"
+      # RTSP端口
+      - "554:554"
+      # RTMP端口
+      - "1935:1935"
+      # WebRTC端口
+      - "4433:4433"
+      - "5544:5544"
+      # API端口
+      - "8083:8083"
+      - "8084:8084"
+      # 其他端口
+      - "1290:1290"
+      # UDP端口范围（用于RTP）
+      - "30000-30100:30000-30100/udp"
+      - "6001:6001/udp"
+      - "4888:4888/udp"
+    volumes:
+      # 持久化配置文件
+      - ./data/configs:/app/configs
+      # 持久化日志
+      - ./data/logs:/app/logs
+      # 可选：自定义web界面
+      - ./data/web:/app/web
+    environment:
+      - TZ=Asia/Shanghai
+      # 可选：设置日志级别
+      - LOG_LEVEL=info
+    networks:
+      - easydarwin-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/api/v1/getserverinfo"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  easydarwin-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  easydarwin-data:
+    driver: local
